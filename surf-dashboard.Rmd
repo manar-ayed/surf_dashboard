@@ -1,0 +1,313 @@
+---
+title: "SURF DASHBOARD"
+output: 
+  flexdashboard::flex_dashboard:
+    theme: cerulean
+    orientation: rows
+    #orientation: columns
+    vertical_layout: scroll
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(reticulate)
+library(knitr)
+library(ggplot2)
+system("python Scraping2.py")
+library(dplyr)
+library(plotly)
+library(lubridate)
+library(shiny)
+library(shinyWidgets)
+
+
+
+data1 <- read.csv("C:/Users/LENOVO/Desktop/EDS/Programmation/project/wave_data.csv")
+head(data1)
+#####------------ PREPARING DATA -------------------############
+
+data1 <- data1 %>%
+  mutate(Vagues = as.character(Vagues))
+
+# Filtrer ou gérer les valeurs non valides avant le traitement
+data1 <- data1 %>%
+  filter(!is.na(Vagues) & grepl("-", Vagues)) # Exclure les valeurs NA ou celles sans '-'
+
+# Séparer Vagues en 'min_wave' et 'max_wave', puis calculer 'Vagues': Moyenne
+data1 <- data1 %>%
+  mutate(
+    min_wave = as.numeric(sapply(strsplit(Vagues, "-"), `[`, 1)),
+    max_wave = as.numeric(sapply(strsplit(Vagues, "-"), `[`, 2)),
+    Vagues = (min_wave + max_wave) / 2  # Moyenne des vagues
+  )
+
+
+#print(head(data1))
+#print(colnames(data1))
+
+# Conversion de la colonne 'Wind Speed (km/h)' en numérique
+data1 <- data1 %>%
+ mutate(`Wind.Speed..km.h.` = as.numeric(`Wind.Speed..km.h.`))
+
+# Renommer les colonnes 'Wind Speed (km/h)' et 'Wind Direction'
+data1 <- data1 %>%
+  rename(
+    wind_speed = `Wind.Speed..km.h.`,
+    wind_direction = `Wind.Direction`
+  )
+
+
+#print(head(data1))
+
+wave_data_2 <- data1
+
+# Modifier la colonne 'Date' et créer la colonne 'Datetime'
+wave_data_2 <- wave_data_2 %>%
+  mutate(
+    Date = as.Date(Date, format = "%A %d %B"),  # Appliquer le format français
+    Datetime = as.POSIXct(paste(Date, Hour), format = "%Y-%m-%d %H:%M")  # Combiner date et heure
+  )
+
+#wave_data_2
+
+# -------------------------------------------------------------------
+
+# Function to calculate sea quality score:
+
+calculate_sea_quality <- function(wave_size, wind_speed, wind_direction) {
+  # Assign score based on wave size (in meters)
+  wave_size<- 0
+  if (wave_size <= 1) {
+    wave_score <- 3
+  } else if (wave_size <= 2) {
+    wave_score <- 7
+  } else {
+    wave_score <- 10
+  }
+
+  # Assign score based on wind speed (in km/h)
+  if (wind_speed <= 15) {
+    wind_score <- 10
+  } else if (wind_speed <= 25) {
+    wind_score <- 7
+  } else {
+    wind_score <- 3
+  }
+
+  # Assign score based on wind direction using cardinal points
+  wind_dir_score <- 0  # Default score for onshore or invalid directions
+  
+  # Define cardinal directions for offshore, onshore, or cross-shore
+  if (wind_direction %in% c("nord", "nord-est", "nord-ouest")) {
+    # If wind is from the north (offshore in some locations)
+    wind_dir_score <- 10
+  } else if (wind_direction %in% c("sud", "sud-est", "sud-ouest")) {
+    # If wind is from the south (offshore in some locations)
+    wind_dir_score <- 10
+  } else if (wind_direction %in% c("est", "ouest")) {
+    # Cross-shore winds
+    wind_dir_score <- 5
+  } else if (wind_direction %in% c("onshore")) {
+    # If wind is directly onshore
+    wind_dir_score <- 0
+  }
+
+  # Calculate the average sea quality score
+  sea_quality_score <- mean(c(wave_score, wind_score, wind_dir_score))
+  return(sea_quality_score)
+}
+
+# -------------------------------------------------------------------
+```
+
+
+Row
+-----------------------------------------------------------------------
+
+### <span style="color:#425de3; font-weight: bold; font-style: italic;">Wave Size</span>
+
+```{r}
+#### WAVE SIZE OVER TIME ########
+wave_data_2$Datetime <- ymd_hms(wave_data_2$Datetime)
+ggplot(wave_data_2, aes(x = Datetime, y = Vagues)) +
+  geom_line(color = "#b2d66f", size = 1) +   # Ligne représentant les vagues
+  geom_point(color = "#cba1f7", size = 2) +   # Points pour mettre en évidence les valeurs
+  labs(
+    title = "Wave Size Over Time",         # Titre du graphique
+    x = "Time",                           # Titre de l'axe X
+    y = "Wave Size (m)"                   # Titre de l'axe Y
+  ) +
+  theme_minimal() +                       # Thème pour un design épuré
+  theme(
+    plot.title = element_text(hjust = 0.5), # Centrer le titre
+    axis.text.x = element_text(angle = 45, hjust = 1), # Rotation des dates pour lisibilité
+    plot.margin = margin(10, 10, 10, 10)   # Ajuster les marges pour plus d'espace autour du graphique
+  ) + 
+  theme(plot.margin = margin(t = 30))  # Ajouter un espace en haut du graphique
+  
+
+```
+
+
+
+### <span style="color:#425de3; font-weight: bold; font-style: italic;">Table of Wave Size & Wind Speed this Week</span>
+
+```{r}
+
+
+# Sélectionner les colonnes Date, Hour, Vagues, wind_direction et lesrenommer
+wave_table <- wave_data_2 %>%
+  select(Date, Hour, Vagues, wind_direction) %>%
+  rename(
+    `Mean Wave Size` = Vagues,
+    `Wind Direction` = wind_direction
+  )
+
+# Afficher les résultats
+#head(wave_table)
+DT::datatable(
+  wave_table,
+  options = list(
+    pageLength = 5,           # Afficher 5 lignes par page
+    searching = FALSE,        # Désactiver la barre de recherche
+    scrollX = TRUE,           # Ajouter le défilement horizontal si nécessaire
+    scrollY = "300px", 
+    autoWidth = TRUE,         # Ajuster automatiquement la largeur des colonnes
+    columnDefs = list(
+      list(targets = 0, width = '150px')  
+    )
+  ),
+  class = 'display',           
+  rownames = FALSE,            
+  callback = htmlwidgets::JS(
+    "table.on('draw', function() {",
+    "  table.rows().every(function(rowIdx, tableLoop, rowLoop) {",
+    "    var data = this.data();",
+    "    if (data[2] > 3) {",  # Si la valeur des vagues est supérieure à 3
+    "      $(this.node()).css('background-color', '#bcf6fa');",  # Colorie la cellule 
+    "    }",
+    "  });",
+    "});"
+  )
+)
+
+```
+
+Row
+-----------------------------------------------------------------------
+
+### <span style="color:#425de3; font-weight: bold; font-style: italic;">Wind Speed</span>
+
+```{r}
+###### WIND SPEED OVER TIME #########
+# Create the plot
+ggplot(wave_data_2, aes(x = Datetime, y = wind_speed)) +
+  geom_line(color = "#62cbf5", size = 1) +  # Line representing the wind speed
+  geom_point(color = "#f562bb", size = 2) +  # Points for highlighting values
+  labs(
+    title = "Wind Speed Over Time",  # Title of the plot
+    x = "Date and Time",             # X-axis label
+    y = "Wind Speed (km/h)"          # Y-axis label
+  ) +
+  theme_minimal() +  # Minimal theme for clean design
+  theme(
+    plot.title = element_text(hjust = 0.5),  # Center the title
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate the X-axis labels for better readability
+  )
+```
+
+
+### <span style="color:#425de3; font-weight: bold; font-style: italic;">The Highest Wave</span>
+```{r}
+# HIGHEST WAVE
+highest_wave <- max(wave_data_2$Vagues)
+ggplot() +
+  geom_blank() +
+  annotate("text", x = 0.5, y = 0.5, label = paste("Highest Wave: ", highest_wave, "m"), size = 8, hjust = 0.5, vjust = 0.5) + 
+  theme_void() +  
+  theme(plot.margin = margin(2, 2, 2, 2))
+```
+
+### Chart D {.tabset .tabset-fade}
+--------------------------------------
+### <span style="color:#425de3; font-weight: bold; font-style: italic;">Best Moments Of Practice</span>
+```{r, echo = FALSE, results = "asis"}
+# Filtrer les meilleurs moments pour pratiquer le surf
+best_moments <- wave_data_2 %>%
+  filter(
+    Vagues > 1.0,                                 
+    wind_speed > 20,                              
+    grepl("Nord", wind_direction)               
+  )%>%
+  rename(mean_wave = Vagues) %>%
+  select(-Datetime)
+#print(nrow(best_moments))
+
+# Vérifier si le dataframe 'best_moments' est vide
+if (nrow(best_moments) == 0) {
+  # Afficher un message si aucun moment n'est optimal
+  cat("
+<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border: 1px solid #f5c6cb; border-radius: 5px;'>
+No optimal surfing moments this week! </div>")
+} else {
+  # Display Best Moments of practice
+  DT::datatable(best_moments, options = list(pageLength = 5,searching = FALSE))
+}
+
+```
+
+### <span style="color:#425de3; font-weight: bold; font-style: italic;">Sea Quality</span>
+```{r, echo = FALSE, results = "asis"}
+# Vérifier si le dataframe 'best_moments' contient des données
+if (nrow(best_moments) > 0) {
+
+  # Clean up the 'wind_direction' to match expected format (cardinal directions)
+  best_moments <- best_moments %>%
+    mutate(
+      wind_direction = gsub("Orientation vent ", "", wind_direction), # Remove prefix
+      sea_quality_score = mapply(calculate_sea_quality, mean_wave, wind_speed, wind_direction)
+    )
+
+  # Add a grade based on the sea quality score
+  best_moments <- best_moments %>%
+    mutate(
+      grade = case_when(
+        sea_quality_score <= 3 ~ "Poor",
+        sea_quality_score <= 6 ~ "Fair",
+        sea_quality_score <= 8 ~ "Good",
+        TRUE ~ "Excellent"
+      )
+    )
+
+  # Get the best moment based on the highest sea quality score
+  best_moment <- best_moments %>%
+    filter(sea_quality_score == max(sea_quality_score)) %>%
+    select(Date, Hour, sea_quality_score)
+
+  # Create a gauge chart to display the best sea quality score
+  plot_ly(
+    type = "indicator",
+    mode = "gauge+number",
+    value = best_moment$sea_quality_score,  # The score for the best moment
+    title = list(text = paste("Best Moment to Practice\n", best_moment$Date, "-", best_moment$Hour), 
+                 font = list(size = 16)),
+    gauge = list(
+      axis = list(range = list(0, 30)),  # Adjust the range based on your scale
+      bar = list(color = "#54fde1"),
+      steps = list(
+        list(range = c(0, 10), color = "#fa7581"),
+        list(range = c(10, 20), color = "#fcc16a"),
+        list(range = c(20, 30), color = "#97fd54")
+      )
+    )
+  )
+
+} else {
+  # Afficher un message si 'best_moments' est vide
+  cat("
+<div style='background-color: #f8d7da; color: #721c24; padding: 15px; border: 1px solid #f5c6cb; border-radius: 5px;'>
+No optimal surfing moments this week! </div>")
+}
+
+```
+

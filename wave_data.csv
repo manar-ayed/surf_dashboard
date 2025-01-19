@@ -1,0 +1,49 @@
+Date,Hour,Vagues,Wind Speed (km/h),Wind Direction
+Lundi 20 Janvier,01:00,1.5 - 2.3,27,Orientation vent Est Sud Est
+Lundi 20 Janvier,04:00,1.6 - 2.4,23,Orientation vent Sud Est
+Lundi 20 Janvier,07:00,1.7 - 2.5,21,Orientation vent Sud Est
+Lundi 20 Janvier,10:00,1.7 - 2.5,24,Orientation vent Sud Sud Est
+Lundi 20 Janvier,13:00,1.6 - 2.4,17,Orientation vent Sud Sud Est
+Lundi 20 Janvier,16:00,1.5 - 2.3,15,Orientation vent Est Sud Est
+Lundi 20 Janvier,19:00,1.4 - 2.2,18,Orientation vent Est
+Lundi 20 Janvier,22:00,1.4 - 2.0,20,Orientation vent Est Sud Est
+Mardi 21 Janvier,01:00,1.2 - 1.8,13,Orientation vent Est Sud Est
+Mardi 21 Janvier,04:00,1.1 - 1.7,18,Orientation vent Est Sud Est
+Mardi 21 Janvier,07:00,1.0 - 1.5,21,Orientation vent Est Sud Est
+Mardi 21 Janvier,10:00,0.9 - 1.4,22,Orientation vent Est Sud Est
+Mardi 21 Janvier,13:00,0.8 - 1.2,22,Orientation vent Est Sud Est
+Mardi 21 Janvier,16:00,0.7 - 1.1,17,Orientation vent Est Sud Est
+Mardi 21 Janvier,19:00,0.6 - 1.0,15,Orientation vent Est Sud Est
+Mardi 21 Janvier,22:00,0.6 - 0.9,16,Orientation vent Sud Est
+Mercredi 22 Janvier,01:00,0.5 - 0.8,17,Orientation vent Sud Est
+Mercredi 22 Janvier,04:00,0.5 - 0.8,15,Orientation vent Sud Est
+Mercredi 22 Janvier,07:00,0.6 - 0.9,18,Orientation vent Sud Est
+Mercredi 22 Janvier,10:00,0.6 - 1.0,19,Orientation vent Sud Est
+Mercredi 22 Janvier,13:00,0.6 - 0.9,19,Orientation vent Sud Sud Est
+Mercredi 22 Janvier,16:00,0.6 - 0.9,23,Orientation vent Sud
+Mercredi 22 Janvier,19:00,0.6 - 1.0,18,Orientation vent Sud
+Mercredi 22 Janvier,22:00,0.6 - 0.9,34,Orientation vent Ouest Sud Ouest
+Jeudi 23 Janvier,01:00,0.5 - 0.8,17,Orientation vent Sud Sud Ouest
+Jeudi 23 Janvier,04:00,0.5 - 0.7,18,Orientation vent Ouest Sud Ouest
+Jeudi 23 Janvier,07:00,0.8 - 1.1,25,Orientation vent Ouest Nord Ouest
+Jeudi 23 Janvier,10:00,0.7 - 1.0,25,Orientation vent Nord Ouest
+Jeudi 23 Janvier,13:00,1.5 - 2.3,20,Orientation vent Ouest Nord Ouest
+Jeudi 23 Janvier,16:00,1.3 - 1.9,19,Orientation vent Ouest Sud Ouest
+Jeudi 23 Janvier,19:00,1.2 - 1.8,20,Orientation vent Ouest Sud Ouest
+Jeudi 23 Janvier,22:00,0.6 - 0.9,22,Orientation vent Ouest Sud Ouest
+Vendredi 24 Janvier,01:00,1.2 - 1.8,18,Orientation vent Sud Ouest
+Vendredi 24 Janvier,04:00,2.0 - 3.0,18,Orientation vent Sud
+Vendredi 24 Janvier,07:00,2.2 - 3.2,22,Orientation vent Sud Sud Est
+Vendredi 24 Janvier,10:00,2.1 - 3.1,28,Orientation vent Sud Sud Est
+Vendredi 24 Janvier,13:00,1.9 - 2.9,30,Orientation vent Sud
+Vendredi 24 Janvier,16:00,1.6 - 2.4,30,Orientation vent Sud Sud Ouest
+Vendredi 24 Janvier,19:00,1.7 - 2.6,30,Orientation vent Sud
+Vendredi 24 Janvier,22:00,1.9 - 2.8,27,Orientation vent Sud
+Samedi 25 Janvier,01:00,2.0 - 3.0,25,Orientation vent Sud
+Samedi 25 Janvier,04:00,1.7 - 2.6,18,Orientation vent Sud
+Samedi 25 Janvier,07:00,2.3 - 3.4,12,Orientation vent Sud Ouest
+Samedi 25 Janvier,10:00,2.4 - 3.6,12,Orientation vent Sud
+Samedi 25 Janvier,13:00,3.4 - 5.1,9,Orientation vent Sud Ouest
+Samedi 25 Janvier,16:00,3.7 - 5.6,7,Orientation vent Sud Ouest
+Samedi 25 Janvier,19:00,3.6 - 5.4,8,Orientation vent Sud Sud Ouest
+Samedi 25 Janvier,22:00,3.4 - 5.1,6,Orientation vent Sud
